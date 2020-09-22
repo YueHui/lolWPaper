@@ -4,11 +4,14 @@
 		"style": {
 			"navigationBarTitleText": "英雄壁纸"
 		}
-	}    ,{
-            "path" : "pages/hero/hero",
-            "style" : {}
-        }
-    ],
+	}, {
+		"path": "pages/hero/hero",
+		"style": {
+			"app-plus":{
+				"titleNView":false
+			}
+		}
+	}],
 	"globalStyle": {
 		"navigationBarTextStyle": "white",
 		"navigationBarTitleText": "uni-app",

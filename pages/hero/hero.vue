@@ -5,7 +5,11 @@
 	.heroInfo{padding: 20px;}
 	.skinItem{text-align: center;}
 	.skinTit{text-align: center;}
-	.bigImg{width: 100vw; height: 100vh; position: fixed; top: 0; left:0; background: rgba(0,0,0,0.5); display: none;}
+	.bigImg{
+		width: 100vw; height: 100vh; position: absolute; top: 0; left:0;
+		canvas{width: 100%; height:100%; background: #000;}
+		button{position: absolute; bottom: 0; left: 0;}
+	}
 </style>
 
 <template>
@@ -15,12 +19,13 @@
 			<view>{{hero.name}}</view>
 			<view>{{hero.shortBio}}</view>
 			<view v-for="skin in skins" class="skinItem">
-				<image :src="skin.mainImg || skin.chromaImg" mode="widthFix" @click="showBig"></image>
+				<image :id="skin.mainImg" :src="skin.mainImg || skin.chromaImg" mode="widthFix" @click="showBig(skin.mainImg)"></image>
 				<view class="skinTit">{{skin.name}}</view>
 			</view>
 		</view>
-		<view class="bigImg">
-			
+		<view v-if="showBigImg" class="bigImg">
+			<canvas  canvas-id="canvas" id="canvas"></canvas>
+			<button type="default" @click="closeBigImg">关闭</button>
 		</view>
 	</view>
 </template>
@@ -34,8 +39,11 @@
 		},
 		data() {
 			return {
+				sysInfo:uni.getSystemInfoSync(),
 				hero:{},
-				skins:[]
+				skins:[],
+				showBigImg:false,
+				bigSrc:''
 			};
 		},
 		watch:{
@@ -56,14 +64,34 @@
 						_this.skins = res.data.skins;
 					},
 					fail(e) {
-						console.log(e);
+						uni.showToast({
+							title:"请求失败",
+							duration:2000
+						})
 					}
 				})
 			},
 			getDefaultUrl(){
 				return this.skins[0].sourceImg
 			},
-			showBig(){
+			showBig(url){
+				this.showBigImg = true;
+				this.bigSrc = url;
+				this.drawCanvs(url);
+			},
+			closeBigImg(){
+				this.showBigImg = false;
+				this.bigSrc = '';
+			},
+			drawCanvs(url){
+				const ctx = uni.createCanvasContext('canvas');
+				const img = uni.getImageInfo({
+					src:url,
+					success:(image)=>{
+						console.log(image.width)
+						ctx.drawImage(image,0,0,200,200);
+					}
+				})
 				
 			}
 		}
