@@ -2,7 +2,7 @@
 	<view class="container">
 		<view class="hero" v-for="hero in heroList">
 			<navigator :url="getHeroUrl(hero)">
-				<image :src="getHead(hero)" :alt="hero.name" mode="widthFix">
+				<image :src="getHead(hero)" :alt="hero.name" mode="widthFix" :lazy-load="true">
 			</navigator>
 		</view>
 	</view>

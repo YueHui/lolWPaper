@@ -1,74 +1,71 @@
+<style lang="less" scoped>
+	.topImg{
+		width: 100vw;
+	}
+	.heroInfo{padding: 20px;}
+	.skinItem{text-align: center;}
+	.skinTit{text-align: center;}
+	.bigImg{width: 100vw; height: 100vh; position: fixed; top: 0; left:0; background: rgba(0,0,0,0.5); display: none;}
+</style>
+
 <template>
 	<view v-if="this.hero.heroId">
-		<image :src="getHeadUrl()" mode="heightFix"></image>
-		<view>{{hero.name}}</view>
-		<view>{{hero.shortBio}}</view>
-		<view v-for="skin in skinList">
-			<image :src="getSkinUrl(skin.skinId)" mode="widthFix"></image>
-			<view>{{skin.name}}</view>
+		<image class="topImg" :src="getDefaultUrl()" mode="widthFix"></image>
+		<view class="heroInfo">
+			<view>{{hero.name}}</view>
+			<view>{{hero.shortBio}}</view>
+			<view v-for="skin in skins" class="skinItem">
+				<image :src="skin.mainImg || skin.chromaImg" mode="widthFix" @click="showBig"></image>
+				<view class="skinTit">{{skin.name}}</view>
+			</view>
 		</view>
-		
+		<view class="bigImg">
+			
+		</view>
 	</view>
 </template>
 
 <script>
 	import heroList from '@/libs/hero_list.json';
-	import skinList from '@/libs/cuskin_list.json';
 	export default {
 		onLoad(option) {
 			const hero = heroList.hero.find(h=>h.heroId = option.id);
-			uni.setNavigationBarTitle({
-			    title: hero.name
-			});
 			this.getHeroInfo(option.id);
 		},
 		data() {
 			return {
 				hero:{},
-				skinList:[]
+				skins:[]
 			};
+		},
+		watch:{
+			hero:function(newHero,oldHero){
+				uni.setNavigationBarTitle({
+					title: newHero.name || "无"
+				})
+			}
 		},
 		methods:{
 			getHeroInfo(heroId){
 				const _this = this;
 				uni.request({
 					url:`http://game.gtimg.cn/images/lol/act/img/js/hero/${heroId}.js`,
-					header:{
-						"User-Agent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Mobile Safari/537.36",
-						"Host":"kongyuehui.com",
-						"Accept":"*/*"
-					},
 					success(res) {
-						console.log(res);
+						// console.log(res);
 						_this.hero = res.data.hero;
-						const skinKeys = Object.keys(skinList.cuskin);
-						const _skinList = [];
-						for(let skinId in skinList.cuskin){
-							const skin = skinList.cuskin[skinId];
-							if(skin.isChromas==="false" && skin.name.includes(res.data.hero.title)){
-								skin.skinId = skinId;
-								_skinList.push(skin);
-							}
-						}
-						console.log(_skinList);
-						_this.skinList = _skinList;
-						
+						_this.skins = res.data.skins;
 					},
 					fail(e) {
 						console.log(e);
 					}
 				})
 			},
-			getHeadUrl(){
-				return `https://game.gtimg.cn/images/lol/act/img/champion/${this.hero.alias}.png`
+			getDefaultUrl(){
+				return this.skins[0].sourceImg
 			},
-			getSkinUrl(skin){
-				return `https://game.gtimg.cn/images/lol/act/img/skinloading/${skin}.jpg`;
+			showBig(){
+				
 			}
 		}
 	}
 </script>
-
-<style lang="less">
-
-</style>
