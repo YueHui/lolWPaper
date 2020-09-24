@@ -32,6 +32,7 @@
 
 <script>
 	import heroList from '@/libs/hero_list.json';
+	const fs = require('fs');
 	export default {
 		onLoad(option) {
 			const hero = heroList.hero.find(h=>h.heroId = option.id);
@@ -85,13 +86,15 @@
 			},
 			drawCanvs(url){
 				const ctx = uni.createCanvasContext('canvas');
-				const img = uni.getImageInfo({
-					src:url,
-					success:(image)=>{
-						console.log(image.width)
-						ctx.drawImage(image,0,0,200,200);
+				
+				uni.downloadFile({
+					url,
+					success:function({tempFilePath}){
+						ctx.drawImage(tempFilePath,0,0);
+						ctx.draw();
 					}
 				})
+				
 				
 			}
 		}
