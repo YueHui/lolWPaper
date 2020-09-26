@@ -7,8 +7,13 @@
 	}, {
 		"path": "pages/hero/hero",
 		"style": {
-			"app-plus":{
-				"titleNView":false
+			
+		}
+	}, {
+		"path": "pages/hero/detail",
+		"style": {
+			"app-plus": {
+				"titleNView": false
 			}
 		}
 	}],
