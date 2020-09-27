@@ -6,7 +6,7 @@
 
 <template>
 	<view id="contain">
-		<canvas canvas-id="canvas" :prop="bigSrc" :change:prop="stage.showImage" disable-scroll ></canvas>
+		<canvas canvas-id="canvas" :prop="bigSrc" :change:prop="stage.showImage" disable-scroll @touchstart="stage.touchStart" @touchmove="stage.touchMove" @touchend="stage.touchEnd" ></canvas>
 		<button type="default" @click="goBack">返回</button>
 	</view>
 </template>
@@ -33,7 +33,7 @@
 </script>
 
 <script module="stage" lang="renderjs">
-	let stage,img;
+	let stage,img,startX,startY,originTouches;
 	
 	export default {
 		data(){
@@ -61,53 +61,55 @@
 					img = new createjs.Bitmap(bigImg);
 					img.regX = bigImg.width/2;
 					img.regY = bigImg.height/2;
-					img.x = 0;
-					img.y = 0;
-					img.startX = 0;
-					img.startY = 0;
+					img.x = bigImg.width/2;
+					img.y = bigImg.height/2;
+					
+					img.originX = bigImg.width/2;
+					img.originY = bigImg.height/2;
+					img.originScale = 1;
 					stage.addChild(img);
 					stage.update();
-					this.initHammer();
+					// this.initHammer();
 				}
 				script.src = 'static/easeljs.min.js';
 				document.head.append(script);
 			}
 		},
 		methods:{
-			initHammer(){
-				console.log("init");
-				const contain = document.getElementById('contain');
-				const hammer = new Hammer(contain);
-				console.log({
-					regx:img.regX,
-					regy:img.regY,
-					x:img.x,
-					y:img.y
-				});
-				hammer.on('pan',function(e){
-					
-					console.log({
-						x:img.x,
-						y:img.y,
-						deltaX:e.deltaX,
-						deltaY:e.deltaY
-					});
-					
-					
-					img.x = img.startX + e.deltaX;
-					img.y = img.startY + e.deltaY;
-					stage.update();
-					if(e.isFinal){
-						img.startX = img.x;
-						img.startY = img.y;
-					}
-					
-				})
+			touchStart(e){
+				if(e.touches.length === 1){
+					startX = e.touches[0].x;
+					startY = e.touches[0].y;
+				}else{
+					originTouches = e.touches;
+				}
 				
-				hammer.on('pinch',function(e){
-					console.log(e.scale);
-					img.scaleX = img.scaleY = e.scale;
-				})
+			},
+			touchMove(e){
+				if(e.touches.length === 1){
+					img.x = img.originX + e.touches[0].x - startX;
+					img.y = img.originY + e.touches[0].y - startY;
+					stage.update();
+				}else{
+					console.log(this.getScale(e.touches));
+					img.scaleX = img.scaleY = (img.originScale + this.getScale(e.touches));
+					stage.update();
+				}
+			},
+			touchEnd(e){
+				img.originX = img.x;
+				img.originY = img.y;
+				img.originScale = img.scaleX;
+			},
+			getScale(posList){
+				let d1 = this.getDistance(originTouches[0],originTouches[1]);
+				let d2 = this.getDistance(posList[0],posList[1]);
+				return (d1/d2) * (d1<d2?-1:1);
+			},
+			getDistance(p1,p2){
+				const dx = Math.abs(p1.x - p2.x);
+				const dy = Math.abs(p1.y - p2.y);
+				return Math.sqrt(dx*dx + dy*dy)
 			},
 			loadImg(url){
 				return new Promise((resolve,reject)=>{
