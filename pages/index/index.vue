@@ -1,26 +1,59 @@
 <template>
-	<view class="container">
-		<view class="hero" v-for="hero in heroList">
-			<navigator :url="getHeroUrl(hero)">
-				<image :src="getHead(hero)" :alt="hero.name" mode="widthFix" :lazy-load="true">
-			</navigator>
+	<view>
+		<view>版本:{{heroListInfo.version}}  更新时间:{{heroListInfo.fileTime}}</view>
+		<button type="default" @click="loadHeroList">更新</button>
+		<view class="container">
+			<view class="hero" v-for="hero in heroListInfo.hero" >
+				<navigator :url="getHeroUrl(hero)">
+					<image :src="getHead(hero)" :alt="hero.name" mode="widthFix" :lazy-load="true">
+				</navigator>
+			</view>
+		</view>
+		<view v-if="!heroListInfo.hero">
+			加载中...
 		</view>
 	</view>
 </template>
 
 <script>
-	import heroList from '@/libs/hero_list.json'
 	export default {
-		onReady() {
-			
+		mounted() {
+			try{
+				const heroList = uni.getStorageSync('heroList');
+				if(heroList){
+					this.heroListInfo = heroList;
+				}else{
+					this.loadHeroList();
+				}
+				
+			}catch(e){
+				uni.showToast({
+					icon:'none',
+					title:"加载数据错误"
+				});
+			}
 		},
 		data() {
 			return {
-				heroList:heroList.hero,
-				
+				heroListInfo:{},
 			}
 		},
 		methods: {
+			loadHeroList(){
+				uni.showToast({
+					icon:'loading',
+					title:"加载中..."
+				});
+				uni.request({
+					url:'https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js',
+					success(res){
+						//{hero,version,fileName,fileTime}
+						this.heroListInfo = res.data;
+						uni.setStorageSync('heroList',res.data)
+					}
+					
+				})
+			},
 			getHead(hero){
 				return `//game.gtimg.cn/images/lol/act/img/champion/${hero.alias}.png`
 			},

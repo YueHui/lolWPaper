@@ -15,7 +15,7 @@
 			<view>{{hero.name}}</view>
 			<view>{{hero.shortBio}}</view>
 			<view v-for="skin in skins" class="skinItem">
-				<image :id="skin.mainImg" :src="skin.mainImg || skin.chromaImg" mode="widthFix" @click="showBig(skin.mainImg)"></image>
+				<image :id="skin.mainImg" :src="skin.mainImg || skin.chromaImg" mode="widthFix" @click="showBig(skin)"></image>
 				<view class="skinTit">{{skin.name}}</view>
 			</view>
 		</view>
@@ -65,8 +65,8 @@
 			getDefaultUrl(){
 				return this.skins[0].sourceImg
 			},
-			showBig(url){
-				uni.setStorageSync("bigSrc",url);
+			showBig(skin){
+				uni.setStorageSync("bigSrc",skin.mainImg || skin.chromaImg);
 				uni.navigateTo({
 					url:`/pages/hero/detail`
 				})
