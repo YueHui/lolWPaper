@@ -66,7 +66,9 @@
 				return this.skins[0].sourceImg
 			},
 			showBig(skin){
-				uni.setStorageSync("bigSrc",skin.mainImg || skin.chromaImg);
+				uni.setStorageSync("bigImg",skin.mainImg || skin.chromaImg);
+				uni.setStorageSync("loadingImg",skin.loadingImg || '');
+				console.log(skin);
 				uni.navigateTo({
 					url:`/pages/hero/detail`
 				})
